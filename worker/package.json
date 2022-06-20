@@ -1,0 +1,21 @@
+{
+  "name": "worker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "root@codestorage.dune:gogs-repositories/nurv/worker.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "miniflare": "^2.5.0",
+    "mqtt": "^4.3.7",
+    "node-fetch": "^2.6.1",
+    "ws": "^8.7.0"
+  }
+}
