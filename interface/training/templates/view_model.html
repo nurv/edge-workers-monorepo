@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% load fuzzy %}
+{% load humanize %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ object.model.name }}
+            <small class="text-muted"><code>{{ object.id }}</code></small>
+        </h1>
+
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <form style="margin-bottom: 0px;" action="{% url "training:deleteVersionFeature" object.pk %}"
+                  method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fa fa-trash"></i>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    <ul class="nav nav-tabs" id="myTab" role="tablist">
+        <li class="nav-item" role="presentation">
+            <button class="nav-link active" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile"
+                    type="button"
+                    role="tab" aria-controls="profile" aria-selected="false">Model Details
+            </button>
+        </li>
+        <li class="nav-item" role="presentation">
+            <button class="nav-link" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button"
+                    role="tab" aria-controls="home" aria-selected="true">Evaluation
+            </button>
+        </li>
+    </ul>
+    <style>
+        .card.col {
+            margin-left: 5px;
+            margin-right: 5px;
+        }
+    </style>
+    <div class="tab-content" id="myTabContent">
+        <div class="tab-pane active" id="profile" role="tabpanel" aria-labelledby="profile-tab"
+             style="margin-top: 20px">
+            <div class="row">
+                <div class="card col">
+                    <div class="card-body">
+                        <h5 class="card-title">Details</h5>
+                        <p class="card-text">
+                        <dl>
+                            <dt>ID</dt>
+                            <dd><code>{{ object.id }}</code></dd>
+                            <dt>Created at</dt>
+                            <dd>{{ object.created|naturaltime }}</dd>
+                            <dt>Training duration</dt>
+                            <dd>{{ duration }}</dd>
+                        </dl>
+                        </p>
+                    </div>
+                </div>
+                <div class="card col">
+                    <div class="card-body">
+                        <h5 class="card-title">Data Snapshot</h5>
+                        <p class="card-text">
+                        <dl>
+                            <dt>Name</dt>
+                            <dd>
+                                <a href="{% url "datasets:show" object.dataset.dataset.id %}">{{ object.dataset.dataset.name }}</a>
+                            </dd>
+                            <dt>Mean</dt>
+                            <dd>{{ object.dataset.dataset.mean }}</dd>
+                            <dt>std</dt>
+                            <dd>{{ object.dataset.dataset.std }}</dd>
+                        </dl>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="tab-pane" id="home" role="tabpanel" aria-labelledby="home-tab"
+             style="margin-top: 20px">
+            {% for key, value in evaluation_result.items %}
+                {% if key != "combined" %}
+                <div class="card">
+                    <div class="card-body">
+                        <h5 class="card-title"><code>{{ key }}</code></h5>
+                        <p class="card-text">
+                        <dl>
+                            {% for key, value in value.items %}
+                                {% if key != "loss_img" %}
+                                <dt>{{ key }}</dt>
+                                <dd>{{ value }}</dd>
+                                {% endif %}
+                            {% endfor %}
+                            <img src="{{ value.loss_img }}" alt="">
+                        </dl>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
+    </div>
+
+{% endblock %}

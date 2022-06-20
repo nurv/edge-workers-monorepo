@@ -1,0 +1,220 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Data Snapshots</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal"
+                    data-bs-target="#exampleModal">
+                <i class="fa fa-plus"></i>
+                New
+            </button>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Name</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in objects %}
+            <tr>
+                <td><a href="{% url "datasets:show" object.pk %}">{{ object.name }}</a></td>
+            </tr>
+        {% endfor %}
+
+        </tbody>
+    </table>
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">New Data Snapshot</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <label class="form-label" for="id_name">Name</label>
+                            <input type="text"
+                                   name="name"
+                                   maxlength="1024"
+                                   class="form-control"
+                                   placeholder="Name"
+                                   title=""
+                                   required=""
+                                   id="id_name">
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Snapshot type</label>
+                            <select id="type" class="form-select" aria-label="Default select example">
+                                <option selected>--------</option>
+                                <option>Forecast</option>
+                                <option>Classification</option>
+                                <option>Sequence to Sequence</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="exampleFormControlInput1" class="form-label">Data source</label>
+                            <select class="form-select" aria-label="Default select example">
+                                <option selected>--------</option>
+                                <option>Time Series DB</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <select id="collection" class="form-select" id="collection"
+                                    aria-label="Default select example">
+                                <option selected>--------</option>
+                                {% for object in collections %}
+                                    <option value="{{ object.name }}">{{ object.name }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div id="advanced" class="d-none">
+                            <ul class="nav nav-tabs" id="myTab" role="tablist">
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab"
+                                            data-bs-target="#home" type="button" role="tab" aria-controls="home"
+                                            aria-selected="true">Features
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="profile-tab" data-bs-toggle="tab"
+                                            data-bs-target="#profile"
+                                            type="button" role="tab" aria-controls="profile" aria-selected="false">Query
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="messages-tab" data-bs-toggle="tab"
+                                            data-bs-target="#messages" type="button" role="tab" aria-controls="messages"
+                                            aria-selected="false">Window
+                                    </button>
+                                </li>
+                                <li class="nav-item" role="presentation">
+                                    <button class="nav-link" id="settings-tab" data-bs-toggle="tab"
+                                            data-bs-target="#settings" type="button" role="tab" aria-controls="settings"
+                                            aria-selected="false">Settings
+                                    </button>
+                                </li>
+                            </ul>
+
+                            <!-- Tab panes -->
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="home" role="tabpanel" aria-labelledby="home-tab">
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlInput1" class="form-label">Metric</label>
+                                        <select id="metric" class="form-select" aria-label="Default select example">
+                                            <option selected>--------</option>
+                                            <option value="0">Metric 0</option>
+                                            <option value="1">Metric 1</option>
+                                        </select>
+                                    </div>
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlInput1" class="form-label">Feature name</label>
+                                        <input id="feature_name" type="text" class="form-control" id="feature_name">
+                                        <small id="helpfn" class="form-text text-muted">The input feature name will be
+                                            <code>&lt;feature-name&gt;_features</code> and the output <code>&lt;feature-name&gt;</code></small>
+                                    </div>
+                                </div>
+                                <p></p>
+                                <div class="tab-pane" id="profile" role="tabpanel" aria-labelledby="profile-tab">
+                                    <div class="mb-3">
+                                        <textarea class="form-control" id="exampleFormControlTextarea1"
+                                                  rows="3"></textarea>
+                                        <small id="emailHelp" class="form-text text-muted">This query should filter the
+                                            data.</small>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="messages" role="tabpanel" aria-labelledby="messages-tab">
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlInput1" class="form-label">Window size</label>
+                                        <input id="window_size" type="text" class="form-control"
+                                               id="exampleFormControlInput1">
+                                        <small id="emailHelp" class="form-text text-muted">How many samples before can
+                                            the
+                                            model see</small>
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="exampleFormControlInput1" class="form-label">Look ahead</label>
+                                        <input type="text" class="form-control" id="exampleFormControlInput1">
+                                        <small id="emailHelp" class="form-text text-muted">How many samples into the
+                                            future
+                                            should the model predict</small>
+                                    </div>
+                                </div>
+                                <div class="tab-pane" id="settings" role="tabpanel" aria-labelledby="settings-tab">
+                                    <div class="mb-3">
+                                        <label for="customRange1" class="form-label">Train size</label>
+                                        <input id="train" type="range" class="form-range" min="0" max="100" value="60">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="customRange1" class="form-label">Validation size</label>
+                                        <input id="vali" type="range" class="form-range" min="0" max="100" value="20">
+                                    </div>
+
+                                    <div class="mb-3">
+                                        <label for="customRange1" class="form-label">Test size</label>
+                                        <input id="test" type="range" class="form-range" min="0" max="100" value="20">
+                                    </div>
+
+                                    <div class="form-check">
+                                        <input class="form-check-input" checked type="checkbox" value=""
+                                               id="flexCheckDefault">
+                                        <label id="norm" class="form-check-label" for="flexCheckDefault">
+                                            Normalize data
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="button" id="create" class="btn btn-primary">New</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+
+        <script>
+            const select = document.getElementById('type');
+            select.addEventListener('change', function handleChange(event) {
+                document.getElementById("advanced").classList.remove("d-none")
+            });
+            document.getElementById("feature_name").addEventListener("keyup", (evt) => {
+                var val = document.getElementById("feature_name").value;
+                if (val == "") {
+                    val = "&lt;feature-name&gt;"
+                }
+                document.getElementById("helpfn").innerHTML = "The input feature name will be <code>" + val + "_features</code> and the output <code>" + val + "</code>"
+            });
+
+            document.getElementById("create").addEventListener("click", () => {
+                fetch(window.location, {
+                    method: 'POST',
+                    headers: {
+                        'Accept': 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': "{{ csrf_token }}"
+                    },
+                    body: JSON.stringify({
+                        collection: document.getElementById("collection").value,
+                        metric: parseInt(document.getElementById("metric").value),
+                        window_size: parseInt(document.getElementById("window_size").value),
+                        feature: document.getElementById("feature_name").value,
+                        train: parseInt(document.getElementById("train").value) / 100,
+                        vali: parseInt(document.getElementById("vali").value) / 100
+                    })
+                }).then(() => {
+                    window.location.reload()
+                })
+            })
+        </script>
+    </div>
+{% endblock %}

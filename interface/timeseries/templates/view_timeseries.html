@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% load fuzzy %}
+{% load mongo %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ object.name }} <span class="badge rounded-pill bg-danger">{{ count }}</span></h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <form action="{% url 'timeseries:delete' object|id %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fa fa-trash"></i>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <table class="table">
+        <thead>
+        <tr>
+            <th scope="col">Metrics 0</th>
+            <th scope="col">Metrics 1</th>
+            <th scope="col">Labels</th>
+            <th scope="col">Timestamp</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for object in objects %}
+            <tr>
+
+                <td>{{ object.metrics.0 }}</td>
+                <td>{{ object.metrics.1 }}</td>
+                <td>
+                    {% for data in object.metadata %}
+                        <span class="badge rounded-pill bg-light text-dark">{{ data }}</span>
+                    {% endfor %}
+
+                </td>
+                <td>{{ object.timestamp }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+{% endblock %}

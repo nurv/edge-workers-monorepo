@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">{{ object.name }}</h1>
+        <div class="btn-toolbar mb-2 mb-md-0">
+            <form action="{% url 'datasets:delete' object.pk %}" method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-sm btn-outline-danger">
+                    <i class="fa fa-trash"></i>
+                    Delete
+                </button>
+            </form>
+        </div>
+    </div>
+    <p>
+        <button id="save" class="btn btn-sm btn-outline-primary"><i class="fa-solid fa-floppy-disk"></i> Save</button>
+        <button id="deploy" class="btn btn-sm btn-outline-success"><i class="fa fa-cloud-arrow-up"></i> Deploy</button>
+    </p>
+    <div id="container" style="width:800px;height:600px;border:1px solid grey"></div>
+
+
+    <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <form action="" method="post">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="exampleModalLabel">Deploy function</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label for="exampleFormControlTextarea1" class="form-label">Select Device</label>
+                            <select id="workerselection" class="form-select" aria-label="Default select example">
+                            </select>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button id="do-deploy" type="button" class="btn btn-success">Deploy</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/loader.min.js"></script>
+    <script>
+        require.config({paths: {'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs'}})
+
+        window.MonacoEnvironment = {
+            getWorkerUrl: function (workerId, label) {
+                return `data:text/javascript;charset=utf-8,${encodeURIComponent(`
+          self.MonacoEnvironment = {
+            baseUrl: 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/'
+          };
+          importScripts('https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.21.2/min/vs/base/worker/workerMain.js');`
+                )}`
+            }
+        }
+
+        require(['vs/editor/editor.main'], function () {
+            window.editor = monaco.editor.create(document.getElementById('container'), {
+                value: {% autoescape off %}{{ object.code_js }}{% endautoescape %},
+                language: 'javascript'
+            })
+        })
+
+        document.getElementById("save").addEventListener("click", () => {
+            const value = window.editor.getValue();
+            fetch(window.location, {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    code: window.editor.getValue()
+                }),
+            })
+        })
+        const myModal = new bootstrap.Modal(document.getElementById('exampleModal'), {});
+
+        function removeAll(selectBox) {
+            while (selectBox.options.length > 0) {
+                selectBox.remove(0);
+            }
+        }
+
+        document.getElementById("deploy").addEventListener("click", async () => {
+            const res = await fetch("{% url "workers:api-list" %}");
+            const select = document.getElementById("workerselection")
+            removeAll(select);
+            const a = await res.json()
+            for(var w of a['workers']){
+                const newOption = new Option(w.name, w.id);
+                select.add(newOption)
+            }
+            myModal.show();
+        })
+
+        document.getElementById("do-deploy").addEventListener("click", async () => {
+            const res = await fetch("{% url "workers:deploy" %}", {
+                method: 'POST', // or 'PUT'
+                headers: {
+                    'Content-Type': 'application/json',
+                    "X-CSRFToken": "{{ csrf_token }}"
+                },
+                body: JSON.stringify({
+                    worker: document.getElementById("workerselection").value,
+                    code: window.editor.getValue(),
+                    "function": "{{ object.id }}"
+                }),
+            })
+        })
+    </script>
+{% endblock %}

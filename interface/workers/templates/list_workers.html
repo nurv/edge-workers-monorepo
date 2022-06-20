@@ -1,0 +1,19 @@
+{% extends "base.html" %}
+{% load bootstrap5 %}
+{% block content %}
+    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pt-3 pb-2 mb-3 border-bottom">
+        <h1 class="h2">Devices</h1>
+    </div>
+
+    <div class="row">
+    {% for object in objects %}
+    <div class="card" style="width: 18rem;">
+      <div class="card-body">
+        <h5 class="card-title">{{ object.name }}</h5>
+          <p><span class="badge rounded-pill bg-success">Attached</span></p>
+          <a href="#" class="btn btn-sm btn-outline-secondary">Details</a>
+      </div>
+    </div>
+    {% endfor %}
+    </div>
+{% endblock %}
